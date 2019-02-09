@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block title %} Login Page{% endblock %}
+{% block head %}
+  {{ super() }}
+    <link href="/static/css/login.css" rel="stylesheet">
+    <link href="/static/css/fontawesome-all.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+
+<div id="page" class="page-style" background-data-image="/static/images/background.jpg">
+  <div class="pattern">
+      <div class="wrapper" style="z-index:2;min-height:100vh" >
+          <div class="font-title">
+              <h1 class="site-title">SmartHousexPL</h1>
+          </div>
+          <form class="login" method="post" action="login">
+              <p class="title">Log in</p>
+              <input type="text" placeholder="Username" autofocus name="username" id="user-name" value="{{
+      request.form.username }}"/>
+              <i class="fa fa-user"></i>
+              <input type="password" placeholder="Password" name="password" value="{{
+      request.form.password }}"/>
+              <i class="fa fa-key"></i>
+              {% if error %}
+                  <p id="message_post" style="color:red;font-size:12px">{{ error }}</p>
+              {% endif %}
+              <p id="message" class="error" style="height:20px"></p>
+              <button type="submit" name="Submit">
+                  <i class="spinner"></i>
+                  <span class="state">Log in</span>
+              </button>
+          </form>
+      </div>
+      <div id="loading" hidden style="z-index:3">
+          <img src="static/images/loading.gif" id="loader">
+      </div>
+  </div>
+</div>
+
+{% endblock %}
