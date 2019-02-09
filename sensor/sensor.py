@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
+from flask import Flask, jsonify
 from time import sleep
 from Adafruit_CCS811 import Adafruit_CCS811
+app = Flask(__name__)
 import sys
 import Adafruit_DHT
 import RPi.GPIO as GPIO
 import time
-import thread
+import _thread
 import json
 import RPi.GPIO as GPIO
 global TRIG
@@ -106,21 +108,37 @@ def measure():
 		mydict['TVOC'] = readTVOC()
 		mydict['TemperatureOut'] = readTemperatureOut()
 		mydict['Distance']=readDistance()
+		json_string = json.dumps(mydict)
+		print (json_string)
 		
 def handle():
 	global mydict
 	while(1):
 		json_string = json.dumps(mydict)
-		print json_string
+		print (json_string)
 		sleep(2)
 		
+@app.route('/')
+def index():
+    return 'Hello world'
+
+@app.route('/get_data', methods=['POST', 'GET']) 
+def get_data():
+    global mydict
+    return jsonify(mydict)
+
+def run_server():    
+	if __name__ == '__main__':
+		app.run(debug=True, host='0.0.0.0')
+		
 try:
-   thread.start_new_thread(measure, ())
-   thread.start_new_thread(handle, ())
+	_thread.start_new_thread(measure, ())
+	run_server()
 except:
-   print "Error: unable to start thread"
+   print ("Error: unable to start thread")
 
 while 1:
    pass
-	
-		
+
+while 1:
+   pass
