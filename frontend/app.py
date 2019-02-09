@@ -10,7 +10,9 @@ import json
 from serializer import *
 import flask_login
 import os
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user
+import requests
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -22,6 +24,9 @@ class Config(object):
 
 	DEBUG = True
 	SECRET_KEY = 'W9xJeJKrUqiG9cONoM4O9ZtpZ1k4wrRJXexHtP8V'
+
+	SENSORS_URL = 'http://192.168.0.10:6000/get_data'
+
 
 app = Flask(__name__, static_url_path='/static')
 app.config.from_object(Config)
@@ -76,13 +81,33 @@ def logout():
 	return redirect(url_for('login_page'))
 
 
+@app.route('/user/<user_id>')
+@login_required
+def user(user_id):
+	user = User.query.filter_by(id=user_id).first_or_404()
+
+	return render_template('user.html', data=user)
+
 
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def home():
-	users = User.query.all()
-	data = {'users': users}
+	inhibitants = User.query.filter(User.rights.in_((2, 3)))
+	friends = User.query.filter(User.rights.in_((0, 1)))
+	data = {'users': inhibitants, 'friends': friends}
 	return render_template('index.html', data=data)
+
+
+@app.route('/get_info')
+@login_required
+def get_info():
+
+	r = requests.post(Config.SENSORS_URL, data={})
+
+	if r.status_code != 200:
+		return
+
+	return jsonify(r.json())
 
 
 @app.before_first_request
@@ -93,10 +118,22 @@ def create_users():
 	if user is not None:
 		return
 
-	for i in ['maciek', 'patryk', 'wojtek', 'dawid']:
-		u = User(name=i)
+	users = [
+		['maciek', 2],
+		['patryk', 3],
+		['wojtek', 2],
+		['dawid', 3],
+		['roman', 0],
+		['stefan', 1],
+		['ania', 0],
+		['iza', 1]
+	]
+	for data in users:
+		name, rights = data
+		u = User(name=name, rights=rights)
 		u.set_password('1234')
 		db.session.add(u)
+
 	db.session.commit()
 
 
@@ -105,4 +142,4 @@ if __name__ == '__main__':
 	
 	db.init_app(app)
 
-	app.run(host='0.0.0.0', port=5000)
+	app.run( port=8000)
