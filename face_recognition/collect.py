@@ -9,7 +9,8 @@ samples = int(input("How many samples?"))
 face_id = input('\n Enter id of the new usser and press ENTER ')
 print("\n Look at the camera and wait")
 # Initialize individual sampling face count
-count = 0
+offset = 626
+count = offset
 while(True):
 	print(count)
 	ret, img = cam.read()
@@ -25,7 +26,7 @@ while(True):
 	k = cv2.waitKey(100) & 0xff # Press 'ESC' for exiting video
 	if k == 27:
 		break
-	elif count >= samples: # Take 30 face sample and stop video
+	elif count >= samples + offset: # Take 30 face sample and stop video
 		break
 # Do a bit of cleanup
 print("\n Completed. Exiting ")

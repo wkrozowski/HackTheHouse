@@ -40,10 +40,12 @@ while True:
         cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
 
         id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
-
+        #print("int" + str(confidence))
         if (confidence < 80 and confidence > 0):
             id = names[id]            
             confidence = "  {0}%".format(round(100 - confidence))
+         #   print("str" + confidence)
+
         else:
             id = "unknown"
             confidence = "  {0}%".format(round(100 - confidence))
