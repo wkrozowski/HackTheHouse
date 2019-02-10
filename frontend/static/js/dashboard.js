@@ -3,7 +3,7 @@
     $('#TemperatureIn').text(data['TemperatureIn']);
     $('#TemperatureOut').text(data['PPM']);
     $('#humidity').text(data['Humidity']);
-
+    $('#thermostat').text(data['class_res']);
     if(parseFloat(data['Distance']) > 200) {
       $('#car').text('Away');
     } else {

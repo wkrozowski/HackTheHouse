@@ -34,7 +34,7 @@ class Config(object):
 	SENSORS_URL = 'http://10.14.194.162:5000/get_data'
 	FACE_URL = 'http://10.14.131.236:5000/recognize'
 	FINGER_PRINT_URL = 'http://10.14.167.219:5000/get_fingerprint'
-	THERMOSTAT_URL = 'http://10.14.157.202:8888/get_regression'
+	THERMOSTAT_URL = 'http://localhost:8888/get_regression'
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -119,7 +119,22 @@ def get_info():
 
 	finger_print = get_data(Config.FINGER_PRINT_URL)
 
-	print(finger_print)
+	now = datetime.now()
+
+	timestamp = (now.hour * 60 + now.minute) / 1440
+
+	ddd = dict()
+
+	ddd['array'] = np.array([timestamp, sensors['TemperatureOut'], sensors['Humidity'], 1, 1, 1, 1])
+	print(ddd)
+	thermostat = get_data(Config.THERMOSTAT_URL, ddd)
+	print(thermostat)
+	try:
+		sensors['class_res'] = round(float(thermostat['result']), 2)
+	except:
+		pass
+
+	print(sensors)
 
 	if not finger_print:
 		return jsonify(sensors)
@@ -234,14 +249,14 @@ def video_feed():
 
 
 def get_data(url, data={}):
-	try:
-		r = requests.post(url, data=data, timeout=2)
-		if r.status_code != 200:
-			return {}
-		return r.json()
-
-	except:
+	# try:
+	r = requests.post(url, data=data, timeout=2)
+	if r.status_code != 200:
 		return {}
+	return r.json()
+
+	# except:
+	# 	return {}
 
 
 # import pandas as pd
