@@ -33,3 +33,12 @@ class Presence(db.Model):
 
 	def set_date(self):
 		self.exit = datetime.datetime.utcnow
+
+
+class Measurements(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    date = db.Column(db.DateTime)
+    tIn = db.Column(db.Float)
+    tOut = db.Column(db.Float)
+    humidity = db.Column(db.Float)

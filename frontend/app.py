@@ -32,8 +32,9 @@ class Config(object):
 	SECRET_KEY = 'W9xJeJKrUqiG9cONoM4O9ZtpZ1k4wrRJXexHtP8V'
 
 	SENSORS_URL = 'http://10.14.194.162:5000/get_data'
-
 	FACE_URL = 'http://10.14.131.236:5000/recognize'
+	FINGER_PRINT_URL = 'http://10.14.167.219:5000/get_fingerprint'
+	THERMOSTAT_URL = 'http://10.14.157.202:8888/get_regression'
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -100,22 +101,75 @@ def user(user_id):
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def home():
+	# load_data()
 	inhibitants = User.query.filter(User.rights.in_((2, 3)))
 	friends = User.query.filter(User.rights.in_((0, 1)))
 	data = {'users': inhibitants, 'friends': friends, 'sensors': get_data(Config.SENSORS_URL)}
 	return render_template('index.html', data=data)
 
 
+last_time_stamp = None
+last_name = None
+from datetime import datetime, timedelta
+
 @app.route('/get_info', methods=['POST'])
 @login_required
 def get_info():
-	return jsonify(get_data(Config.SENSORS_URL))
+	sensors = get_data(Config.SENSORS_URL)
+
+	finger_print = get_data(Config.FINGER_PRINT_URL)
+
+	print(finger_print)
+
+	if not finger_print:
+		return jsonify(sensors)
+
+	message = finger_print['Message1']
+
+	if message == 'User not recognized':
+		return jsonify(sensors)		
+	
+	name = message.split(' ')[0].lower()
+
+	timestamp = datetime.fromtimestamp(finger_print['Timestamp1'])
+	
+	global last_time_stamp
+	global last_name
+
+	if last_time_stamp == timestamp:
+		return jsonify(sensors)
+
+	if last_name == name and \
+		last_time_stamp + timedelta(seconds=5) > timestamp:
+
+		last_time_stamp = timestamp
+		return jsonify(sensors)
+
+	last_name = name
+	last_time_stamp = timestamp
+
+	user = User.query.filter_by(name=name).first()
+
+	if user is None or user.rights in (0, 1):
+		sensors['fingerprint'] = [name, 0]
+		return jsonify(sensors)
+
+	sensors['fingerprint'] = [name, 1]
+	return jsonify(sensors)
 
 
 @app.route('/statistics', methods=['POST', 'GET'])
 @login_required
 def statistics():
-	data = {}
+	mes = db.session.query(Measurements).order_by(Measurements.id.desc()).limit(50).all()
+	data = {'in': [], 'out': [], 'timestamps': [], 'humidity': []}
+
+	for d in mes:
+		data['in'].append(d.tIn)
+		data['out'].append(d.tOut)
+		data['timestamps'].append(d.date.strftime("%m-%d %H:%M"))
+		data['humidity'].append(d.humidity)
+
 	return render_template('statistics.html', data=data)
 
 
@@ -137,11 +191,10 @@ def get_photo():
 	user = User.query.filter_by(name=answer['person']).first()
 	if user is None:
 
-		return redirect(url_for('login'))
+		return redirect(url_for('login_page'))
 
 	login_user(user, remember=True)
 	return redirect(url_for('home'))
-
 
 
 def get_data(url, data={}):
@@ -153,6 +206,26 @@ def get_data(url, data={}):
 
 	except:
 		return {}
+
+
+# import pandas as pd
+
+# def load_data():
+# 	m = Measurements.query.first()
+# 	print(m.date)
+# 	pass
+# 	# df = pd.read_csv('static/data.csv', sep=',', header=0)
+
+# 	# df['timestamp'] = df['timestamp'].apply(lambda x: (datetime.fromtimestamp(x)))
+
+# 	# for col in ['tIn', 'tOut', 'humidity']:
+# 	# 	df[col] = df[col].apply(lambda x: round(x, 2))
+
+# 	# for index, row in df.iterrows():
+# 	# 	m = Measurements(tIn=row.tIn, humidity=row.humidity, tOut=row.tOut)
+# 	# 	db.session.add(m)
+
+# 	# db.session.commit()
 
 @app.before_first_request
 def create_users():

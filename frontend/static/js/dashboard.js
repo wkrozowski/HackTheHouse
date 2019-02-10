@@ -4,6 +4,12 @@
     $('#TemperatureOut').text(data['TemperatureOut']);
     $('#humidity').text(data['Humidity']);
 
+    if('fingerprint' in data) {
+
+      if(data['fingerprint'][1] == 1) {
+        $.notify(data['fingerprint'][0] + ' enter the building!', 'success');
+      }
+    }
   }
 
 
