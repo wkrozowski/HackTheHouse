@@ -33,7 +33,7 @@ class Config(object):
 
 	SENSORS_URL = 'http://10.14.194.162:5000/get_data'
 
-	FACE_URL = 'http://10.14.194.162:5000/recognize'
+	FACE_URL = 'http://10.14.131.236:5000/recognize'
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -115,21 +115,31 @@ def get_info():
 
 @app.route('/get_photo', methods=['POST'])
 def get_photo():
+	print('blabla')
 	image_b64 = request.values['imgBase64']
 
-	image_b64 = image_b64.replace('data:image/png;base64', '')
+	image_b64 = image_b64.replace('data:image/png;base64,', '')
 
 	data = {'image': image_b64}
-	imgdata = base64.b64decode(str(image_b64))
-	image = Image.open(io.BytesIO(imgdata))
-	im = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
+	# imgdata = base64.b64decode(str(image_b64))
+	# image = Image.open(io.BytesIO(imgdata))
+	# im = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
+	# cv2.imwrite('data.png', im)
+	answer = get_data(Config.FACE_URL, data)
 	
-	answer = get_data(Config.FACE_URL)
-	print(recognize(im))
+
+	user = User.query.filter_by(name=answer['person']).first()
+	if user is None:
+
+		return redirect(url_for('login'))
+	login_user(user, remember=True)
+	return redirect(url_for('home'))
+
+	return render_template('login.html')
 
 
-def get_data(url):
-	r = requests.post(url, data={})
+def get_data(url, data={}):
+	r = requests.post(url, data=data)
 	if r.status_code != 200:
 		return {}
 	return r.json()

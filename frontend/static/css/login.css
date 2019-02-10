@@ -12,7 +12,7 @@
 }
 
 .pattern {
-  background:rgba(0,0,0,.5) url(../images/pattern.png);
+
   min-height:100vh;
 }
 
@@ -238,7 +238,4 @@ footer a, footer a:link {
 
 @media (min-width: 992px) {
 
-  .font-title{
-    margin-top:-80px;
-  }
 }
