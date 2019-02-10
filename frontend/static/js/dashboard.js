@@ -1,9 +1,14 @@
   function updateDashboard(data) {
 
     $('#TemperatureIn').text(data['TemperatureIn']);
-    $('#TemperatureOut').text(data['TemperatureOut']);
+    $('#TemperatureOut').text(data['PPM']);
     $('#humidity').text(data['Humidity']);
 
+    if(parseFloat(data['Distance']) > 200) {
+      $('#car').text('Away');
+    } else {
+      $('#car').text('Present');
+    }
     if('fingerprint' in data) {
 
       if(data['fingerprint'][1] == 1) {
@@ -11,13 +16,3 @@
       }
     }
   }
-
-
-jQuery(document).ready(function() {
-  
-  if (typeof google === 'object' && typeof google.maps === 'object') {
-    markers['robot'].setVisible(true);
-    fitMap();
-  }
-});
-  
