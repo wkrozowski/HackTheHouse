@@ -6,14 +6,14 @@ import json
 import sys
 import RPi.GPIO as GPIO
 import _thread
-import serial
+
 import time
 import Adafruit_DHT
 from Adafruit_CCS811 import Adafruit_CCS811
 
 #Initial declarations
 app = Flask(__name__)
-ser = serial.Serial('/dev/ttyACM0',9600)	#Open the serial port
+
 #Run CCS811 configuration
 global ccs
 ccs =  Adafruit_CCS811()
