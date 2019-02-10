@@ -95,7 +95,6 @@ document.getElementById("snap").addEventListener("click", function() {
 
   var dataURL = canvas.toDataURL();
 
-  alert('asdasd')
   var form = $('<form action="get_photo" method="POST">' + 
     '<input type="hidden" name="imgBase64" value="' + dataURL + '">' +
     '</form>')
@@ -103,17 +102,6 @@ document.getElementById("snap").addEventListener("click", function() {
   $(document.body).append(form);
 
   form.submit();
-
-  // $.ajax({
-  //   type: "POST",
-  //   url: "get_photo",
-  //   data: { 
-  //      imgBase64: dataURL
-  //   }
-  // }).done(function(o) {
-  //   console.log('saved'); 
-  // });
-
 });
 
 

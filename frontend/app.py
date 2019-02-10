@@ -67,11 +67,11 @@ def login():
 	if user is None or not user.check_password(request.form['password']):
 
 		flash('Invalid username or password')
-		return redirect(url_for('login'))
-	login_user(user, remember=True)
-	return redirect(url_for('home'))
+		return redirect(url_for('login_page'))
 
-	return render_template('login.html', form=form)
+	login_user(user, remember=True)
+
+	return redirect(url_for('home'))
 
 
 @app.route('/', methods=['GET'])
@@ -112,6 +112,12 @@ def get_info():
 	return jsonify(get_data(Config.SENSORS_URL))
 
 
+@app.route('/statistics', methods=['POST', 'GET'])
+@login_required
+def statistics():
+	data = {}
+	return render_template('statistics.html', data=data)
+
 
 @app.route('/get_photo', methods=['POST'])
 def get_photo():
@@ -132,17 +138,21 @@ def get_photo():
 	if user is None:
 
 		return redirect(url_for('login'))
+
 	login_user(user, remember=True)
 	return redirect(url_for('home'))
 
-	return render_template('login.html')
 
 
 def get_data(url, data={}):
-	r = requests.post(url, data=data)
-	if r.status_code != 200:
+	try:
+		r = requests.post(url, data=data, timeout=2)
+		if r.status_code != 200:
+			return {}
+		return r.json()
+
+	except:
 		return {}
-	return r.json()
 
 @app.before_first_request
 def create_users():
