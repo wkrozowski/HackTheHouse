@@ -11,8 +11,13 @@ import time
 import _thread
 import json
 import RPi.GPIO as GPIO
+import datetime
 global TRIG
 global ECHO
+global finger_print
+finger_print = str("")
+import serial
+ser = serial.Serial('/dev/ttyACM0',9600)
 TRIG = 23 
 ECHO = 24
 
@@ -24,6 +29,14 @@ mydict = {
   'PPM':				0,
   'TVOC':				0,
   'Distance':			0,
+  'Timestamp':			time.time(),
+}
+
+global fingerprint_info
+
+fingerprint_info = {
+	'Message1':			"",
+	'Timestamp1':	time.time(),
 }
 ccs =  Adafruit_CCS811()
 
@@ -62,29 +75,29 @@ def readDistance():
 def readHumidity():
 	humidity, temperature = Adafruit_DHT.read_retry(22, 4)
 	if humidity is not None:
-		return humidity
+		return round(humidity,2)
 		
 def readTemperatureIn():
 	humidity, temperature = Adafruit_DHT.read_retry(22, 4)
 	if temperature is not None:
-		return temperature
+		return round(temperature,2)
 
 def readPPM():
 	if ccs.available():
 		temp = ccs.calculateTemperature()
 		if not ccs.readData():
-			return ccs.geteCO2()
+			return round(ccs.geteCO2(),2)
 	      
 def readTVOC():
 	if ccs.available():
 		temp = ccs.calculateTemperature()
 		if not ccs.readData():
-			return ccs.getTVOC()
+			return round(ccs.getTVOC(),2)
 
 def readTemperatureOut():
 	temp = ccs.calculateTemperature()
 	if not ccs.readData():
-		return temp
+		return round(temp,2)
 
 global temperatureInside
 global temperatureOutside
@@ -108,8 +121,9 @@ def measure():
 		mydict['TVOC'] = readTVOC()
 		mydict['TemperatureOut'] = readTemperatureOut()
 		mydict['Distance']=readDistance()
-		json_string = json.dumps(mydict)
-		print (json_string)
+		mydict['Timestamp']=time.time()
+		#json_string = json.dumps(mydict)
+		#print (json_string)
 		
 def handle():
 	global mydict
@@ -118,6 +132,19 @@ def handle():
 		print (json_string)
 		sleep(2)
 		
+def read_fingerprint():
+	global finger_print
+	global fingerprint_info
+	while True:
+		read_serial=ser.readline()
+		read_serial=bytes(read_serial)
+		read_serial=read_serial[:-2]
+		read_serial=read_serial.decode("utf-8") 
+		if read_serial:
+			finger_print=read_serial
+			fingerprint_info['Message1']=str(finger_print)
+			fingerprint_info['Timestamp1']=time.time()
+
 @app.route('/')
 def index():
     return 'Hello world'
@@ -126,6 +153,12 @@ def index():
 def get_data():
     global mydict
     return jsonify(mydict)
+    
+@app.route('/get_fingerprint', methods=['POST', 'GET'])
+def get_fingerprint():
+	global finger_print
+	global fingerprint_info
+	return jsonify(fingerprint_info)
 
 def run_server():    
 	if __name__ == '__main__':
@@ -133,6 +166,7 @@ def run_server():
 		
 try:
 	_thread.start_new_thread(measure, ())
+	_thread.start_new_thread(read_fingerprint, ())
 	run_server()
 except:
    print ("Error: unable to start thread")
