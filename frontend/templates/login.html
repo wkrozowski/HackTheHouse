@@ -4,14 +4,16 @@
   {{ super() }}
     <link href="/static/css/login.css" rel="stylesheet">
     <link href="/static/css/fontawesome-all.min.css" rel="stylesheet">
+
 {% endblock %}
 {% block content %}
 
 <div id="page" class="page-style" background-data-image="/static/images/background.jpg">
   <div class="pattern">
-      <div class="wrapper" style="z-index:2;min-height:100vh" >
+
+      <div class="wrapper" style="z-index:2;min-height:100vh;margin-top:100px" >
           <div class="font-title">
-              <h1 class="site-title">SmartHousexPL</h1>
+              <h1 class="site-title" style='font-size:55px'>SmartHouse</h1>
           </div>
           <form class="login" method="post" action="login">
               <p class="title">Log in</p>
@@ -25,16 +27,88 @@
                   <p id="message_post" style="color:red;font-size:12px">{{ error }}</p>
               {% endif %}
               <p id="message" class="error" style="height:20px"></p>
+
+              <a href="#" id="modalClick" style="height:20px;float:right">Login by photo</a>
               <button type="submit" name="Submit">
                   <i class="spinner"></i>
                   <span class="state">Log in</span>
               </button>
+
+
           </form>
+
+            <div id="photo" hidden style="margin:0 auto">
+                <div class="row" style="margin:0 auto; display:block;width:640px;height:480px">
+                <video id="video" width="640" height="480" autoplay style="background-color:white"></video>
+                <canvas id="canvas" width="640" height="480"></canvas>
+              </div>
+              <div class="row">
+                <button type="button" style="width:100%:height:20px" id="snap">Log In</button>
+              </div>
+              </div>
       </div>
+
+
       <div id="loading" hidden style="z-index:3">
           <img src="static/images/loading.gif" id="loader">
       </div>
+
+
+
   </div>
 </div>
+
+<script>
+
+// Elements for taking the snapshot
+var canvas = document.getElementById('canvas');
+// var context = canvas.getContext('2d');
+var video = document.getElementById('video');
+
+$( document ).ready(function() {
+  go();
+  $('#modalClick').on('click', function() {
+
+    $('.login').hide(200);
+    $('#photo').show(200)
+  });
+// Grab elements, create settings, etc.
+var video = document.getElementById('video');
+
+function go () {
+  // Get access to the camera!
+  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      // Not adding `{ audio: true }` since we only want video now
+      navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+          //video.src = window.URL.createObjectURL(stream);
+          video.srcObject = stream;
+          video.play();
+      });
+  }
+
+}
+
+
+// Trigger photo take
+document.getElementById("snap").addEventListener("click", function() {
+  // context.drawImage(video, 0, 0, 640, 480);
+
+  var dataURL = canvas.toDataURL();
+
+  $.ajax({
+    type: "POST",
+    url: "get_photo",
+    data: { 
+       imgBase64: dataURL
+    }
+  }).done(function(o) {
+    console.log('saved'); 
+  });
+
+});
+
+
+});
+</script>
 
 {% endblock %}

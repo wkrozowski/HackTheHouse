@@ -21,12 +21,14 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminLTE.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/dist/css/bootstrap.min.css') }}">
 
+  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+  
   <!-- Google Font -->
   <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
 <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
-<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+
 
 {% block head %}
 <title>SmartHouse {% block title %}{% endblock %}</title>

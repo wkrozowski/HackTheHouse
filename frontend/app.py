@@ -19,7 +19,6 @@ import base64
 import io
 import cv2
 import numpy as np
-from recognition import *
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -130,7 +129,7 @@ def get_photo():
 
 
 def get_data(url):
-	r = requests.post(, data={})
+	r = requests.post(url, data={})
 	if r.status_code != 200:
 		return {}
 	return r.json()
