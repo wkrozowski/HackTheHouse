@@ -10,7 +10,7 @@ count = 0
 while count < 5:
 	ret, img = cam.read()
 	cv2.imwrite(str(count) + ".jpg", img)
-	k = cv2.waitKey(300) & 0xff # Press 'ESC' for exiting video
+	k = cv2.waitKey(300) & 0xff # Press 'ESC' 
 	count +=1 
 cam.release()
 cv2.destroyAllWindows()
