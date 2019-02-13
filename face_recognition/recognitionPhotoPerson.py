@@ -65,6 +65,5 @@ for(x,y,w,h) in faces:
 # Do a bit of cleanup
 #cv2.waitKey(0)
 
-#print("\n [INFO] Exiting Program and cleanup stuff")
 #cam.release()
 #cv2.destroyAllWindows()

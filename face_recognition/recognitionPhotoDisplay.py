@@ -61,7 +61,6 @@ cv2.imshow('camera',img)
     # k = cv2.waitKey(10) & 0xff # Press 'ESC' for exiting video
     # if k == 27:
     #     break
-# Do a bit of cleanup
 cv2.waitKey(0)
 
 print("\n [INFO] Exiting Program and cleanup stuff")
